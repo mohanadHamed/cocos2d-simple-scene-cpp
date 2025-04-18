@@ -24,7 +24,7 @@
 
  #include "HelloWorldScene.h"
  #include "ui/CocosGUI.h"
- 
+
  USING_NS_CC;
  
  Scene* HelloWorld::createScene()
@@ -56,12 +56,12 @@
      // Background layer
      auto bg = Sprite::create("background.png");
      bg->setAnchorPoint(Vec2::ZERO);
-     parallaxNode->addChild(bg, 0, Vec2(0.2f, 0.2f), Vec2::ZERO);
+     parallaxNode->addChild(bg, 0, Vec2(0.05f, 0.0f), Vec2::ZERO);
  
      // Foreground layer
      auto fg = Sprite::create("foreground.png");
      fg->setAnchorPoint(Vec2::ZERO);
-     parallaxNode->addChild(fg, 2, Vec2(1.0f, 1.0f), Vec2::ZERO);
+     parallaxNode->addChild(fg, 9, Vec2(0.8f, 0.0f), Vec2::ZERO);
  
      // Character sprite
      auto character = Sprite::create("player_idle.png");
@@ -71,7 +71,7 @@
      float centerY = visibleOrigin.y + visibleSize.height / 2;
      character->setPosition(Vec2(centerX, centerY));                                                            // set the position of the character
  
-     parallaxNode->addChild(character, 1, Vec2(0.5f, 0.5f), character->getPosition());
+     parallaxNode->addChild(character, 10, Vec2(0.8f, 0.0f), character->getPosition());
  
      // Touch to scroll
      auto listener = EventListenerTouchOneByOne::create();
@@ -84,19 +84,19 @@
  
      // Jump Button
      auto jumpButton = cocos2d::ui::Button::create("jump_button.png"); // Use the correct namespace for Button
-     jumpButton->setPosition(Vec2(100, 100));
+     jumpButton->setPosition(Vec2(256, 256));
      jumpButton->addClickEventListener([=](Ref* sender){
          if (!character->getActionByTag(1)) {
              auto jump = Sequence::create(
-                 MoveBy::create(0.2f, Vec2(0, 100)),
-                 MoveBy::create(0.2f, Vec2(0, -100)),
+                 MoveBy::create(0.3f, Vec2(0, 200)),
+                 MoveBy::create(0.4f, Vec2(0, -200)),
                  nullptr
              );
              jump->setTag(1);
              character->runAction(jump);
          }
      });
-     this->addChild(jumpButton, 10);
+     this->addChild(jumpButton, 100);
  
      return true;
  
