@@ -43,8 +43,6 @@
      printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
  }
  
- float startOffsetX = 0;
-
  // on "init" you need to initialize your instance
  bool GameScene::init()
  {
@@ -59,11 +57,8 @@
      // Create Parallax Node
      auto parallaxNode = ParallaxNode::create();
      
-     parallaxNode->setPositionX(-startOffsetX);
-
      this->addChild(parallaxNode);
  
-     float heightScaleFactor = ResolutionHelper::getInstance().getScaleFactorHeight();
      auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();                          // get visible size so we can have a viewpoint
      auto visibleOrigin = cocos2d::Director::getInstance()->getVisibleOrigin();                             // same for origin point
      auto placePosX = visibleOrigin.x + visibleSize.width / 2;
@@ -71,25 +66,25 @@
 	 auto placePos = Vec2(placePosX, placePosY);
      // Background layer
      auto bg = Sprite::create("background.png");
-     bg->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
-	 ResolutionHelper::getInstance().scaleSprite(*bg);
+     ResolutionHelper::getInstance().scaleSprite(*bg);
+     bg->setAnchorPoint(cocos2d::Vec2(0.5f, 1 - ResolutionHelper::getInstance().getScaleFactorHeight()));
      parallaxNode->addChild(bg, 0, Vec2(0.05f, 0.0f), ResolutionHelper::getInstance().getVerticallyScaledPosition(placePos));
  
      // Foreground layer
      auto fg = Sprite::create("foreground.png");
-     fg->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
      ResolutionHelper::getInstance().scaleSprite(*fg);
+     fg->setAnchorPoint(cocos2d::Vec2(0.5f, 1 - ResolutionHelper::getInstance().getScaleFactorHeight()));
      parallaxNode->addChild(fg, 1, Vec2(0.8f, 0.0f), ResolutionHelper::getInstance().getVerticallyScaledPosition(placePos));
  
      // Character sprite
      auto character = Sprite::create("player_idle.png");
      ResolutionHelper::getInstance().scaleSprite(*character);
+
      auto centerX = visibleOrigin.x + visibleSize.width / 2;  
 	 auto centerY = visibleOrigin.y + visibleSize.height / 2; // center of the screen
      auto playerPosX = visibleOrigin.x + visibleSize.width / 2;
-	 auto playerPosY = placePosY + character->getContentSize().height / 2; 
-	 character->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
-
+	 auto playerPosY = ResolutionHelper::getInstance().getEffectiveHeightScaleFactor() * (340 + placePosY + character->getContentSize().height / 2);
+	 character->setAnchorPoint(cocos2d::Vec2(0.5f, 0.5f));
      //character->setPosition(Vec2(playerPosX, playerPosY)));                                                            // set the position of the character
  
      std::ofstream outFile("visible.txt"); // File will be created in working directory
@@ -111,10 +106,10 @@
      listener->onTouchBegan = [](Touch* touch, Event* event) { return true; };
      listener->onTouchMoved = [parallaxNode](Touch* touch, Event* event) {
 		 auto delta = touch->getDelta();
-         float dragMax = cocos2d::Director::getInstance()->getVisibleSize().width / 2;
+         float dragMax = ResolutionHelper::getInstance().getEffectiveHeightScaleFactor() * cocos2d::Director::getInstance()->getVisibleSize().width / 2;
 		 auto newPos = parallaxNode->getPosition() + delta;
-         newPos.x = std::max(newPos.x, -startOffsetX - dragMax);
-         newPos.x = std::min(newPos.x, -startOffsetX + dragMax);
+         newPos.x = std::max(newPos.x, -dragMax);
+         newPos.x = std::min(newPos.x, dragMax);
 
          parallaxNode->setPosition(newPos);
      };
@@ -122,6 +117,7 @@
  
      // Jump Button
      auto jumpButton = cocos2d::ui::Button::create("jump_button.png"); // Use the correct namespace for Button
+	 jumpButton->setScale(ResolutionHelper::getInstance().getScaleFactorHeight());
 	 auto jumpButtonPosX = visibleOrigin.x + jumpButton->getContentSize().width / 2 + 50; // center of the screen
      auto jumpButtonPosY = visibleOrigin.y + jumpButton->getContentSize().height / 2 + 50; // position the button at the center of the screen
      jumpButton->setPosition(Vec2(jumpButtonPosX, jumpButtonPosY));

@@ -1,6 +1,9 @@
 #include "ResolutionHelper.h"
+#include <fstream>
+#include <string>
 
-const cocos2d::Size ResolutionHelper::DESIGN_RESOLUTION = cocos2d::Size(1920, 1080);
+const float ResolutionHelper::DESIGN_RESOLUTION_WIDTH = 4320;
+const float ResolutionHelper::DESIGN_RESOLUTION_HEIGHT = 2160;
 
 ResolutionHelper& ResolutionHelper::getInstance() {
     static ResolutionHelper instance;
@@ -9,7 +12,8 @@ ResolutionHelper& ResolutionHelper::getInstance() {
 
 ResolutionHelper::ResolutionHelper() {
     _visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
-    _designResolution = ResolutionHelper::DESIGN_RESOLUTION;
+    _designResolution = cocos2d::Vec2(DESIGN_RESOLUTION_WIDTH, DESIGN_RESOLUTION_HEIGHT);
+	_frameSize = cocos2d::Director::getInstance()->getOpenGLView()->getFrameSize();
 
     calculateScaleFactors();
     calculateAspectRatios();
@@ -18,6 +22,7 @@ ResolutionHelper::ResolutionHelper() {
 void ResolutionHelper::calculateScaleFactors() {
     _scaleFactorWidth = _visibleSize.width / _designResolution.width;
     _scaleFactorHeight = _visibleSize.height / _designResolution.height;
+	_scaleFactorFrameHeight = _frameSize.height / _designResolution.height;
 }
 
 void ResolutionHelper::calculateAspectRatios()
@@ -34,6 +39,11 @@ float ResolutionHelper::getScaleFactorWidth() const
 float ResolutionHelper::getScaleFactorHeight() const 
 {
     return _scaleFactorHeight;
+}
+
+float ResolutionHelper::getEffectiveHeightScaleFactor() const
+{
+    return _scaleFactorHeight == 1 ? _scaleFactorHeight : _scaleFactorFrameHeight;
 }
 
 float ResolutionHelper::getDesignAspectRatio() const
@@ -59,9 +69,9 @@ void ResolutionHelper::scaleSprite(cocos2d::Sprite& sprite) {
 
     // Check if aspect ratios are different
     float uniformScaleFactor = (resolutionHelper.getCurrentAspectRatio() != resolutionHelper.getDesignAspectRatio()) ?
-        std::min(resolutionHelper.getScaleFactorWidth(), resolutionHelper.getScaleFactorHeight()) :
+        std::max(resolutionHelper.getScaleFactorWidth(), resolutionHelper.getScaleFactorHeight()) :
         resolutionHelper.getScaleFactorWidth(); // Use width as a baseline for scaling if aspect ratios are the same because of horizontal parallax
 
     // Scale the sprite
-    sprite.setScale(uniformScaleFactor);
+    sprite.setScale(getEffectiveHeightScaleFactor());
 }

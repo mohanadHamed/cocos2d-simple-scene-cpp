@@ -5,7 +5,8 @@
 
 class ResolutionHelper {
 public:
-    static const cocos2d::Size DESIGN_RESOLUTION;
+    static const float DESIGN_RESOLUTION_WIDTH;
+    static const float DESIGN_RESOLUTION_HEIGHT;
 
     static ResolutionHelper& getInstance();
 
@@ -14,6 +15,7 @@ public:
 
     float getScaleFactorWidth() const;
     float getScaleFactorHeight() const;
+	float getEffectiveHeightScaleFactor() const;
     float getDesignAspectRatio() const;
     float getCurrentAspectRatio() const;
     cocos2d::Vec2 getVerticallyScaledPosition(cocos2d::Vec2) const;
@@ -31,8 +33,11 @@ private:
 
     cocos2d::Size _designResolution;
     cocos2d::Size _visibleSize;
+    cocos2d::Size _frameSize;
+
     float _scaleFactorWidth;
     float _scaleFactorHeight;
+    float _scaleFactorFrameHeight;
     float _designAspectRatio;
     float _currentAspectRatio;
 };
