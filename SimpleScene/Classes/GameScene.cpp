@@ -22,14 +22,14 @@
  THE SOFTWARE.
  ****************************************************************************/
 
- #include "HelloWorldScene.h"
+ #include "GameScene.h"
  #include "ui/CocosGUI.h"
 
  USING_NS_CC;
  
- Scene* HelloWorld::createScene()
+ Scene* GameScene::createScene()
  {
-     return HelloWorld::create();
+     return GameScene::create();
  }
  
  // Print useful error message instead of segfaulting when files are not there.
@@ -40,7 +40,7 @@
  }
  
  // on "init" you need to initialize your instance
- bool HelloWorld::init()
+ bool GameScene::init()
  {
      //////////////////////////////
      // 1. super init first
@@ -61,17 +61,19 @@
      // Foreground layer
      auto fg = Sprite::create("foreground.png");
      fg->setAnchorPoint(Vec2::ZERO);
-     parallaxNode->addChild(fg, 9, Vec2(0.8f, 0.0f), Vec2::ZERO);
+     parallaxNode->addChild(fg, 1, Vec2(0.8f, 0.0f), Vec2::ZERO);
  
      // Character sprite
      auto character = Sprite::create("player_idle.png");
      auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();                          // get visible size so we can have a viewpoint
      auto visibleOrigin = cocos2d::Director::getInstance()->getVisibleOrigin();                             // same for origin point
-     float centerX = visibleOrigin.x + visibleSize.width / 2;                                                     // X for the center of the screen
-     float centerY = visibleOrigin.y + visibleSize.height / 2;
-     character->setPosition(Vec2(centerX, centerY));                                                            // set the position of the character
+     auto centerX = visibleOrigin.x + visibleSize.width / 2;  
+	 auto centerY = visibleOrigin.y + visibleSize.height / 2; // center of the screen
+     auto playerPosX = centerX;
+	 auto playerPosY = centerY - character->getContentSize().height * 0.1f; // position the character at the center of the screen
+     character->setPosition(Vec2(playerPosX, playerPosY));                                                            // set the position of the character
  
-     parallaxNode->addChild(character, 10, Vec2(0.8f, 0.0f), character->getPosition());
+     parallaxNode->addChild(character, 2, Vec2(0.8f, 0.0f), character->getPosition());
  
      // Touch to scroll
      auto listener = EventListenerTouchOneByOne::create();
@@ -84,18 +86,34 @@
  
      // Jump Button
      auto jumpButton = cocos2d::ui::Button::create("jump_button.png"); // Use the correct namespace for Button
-     jumpButton->setPosition(Vec2(256, 256));
-     jumpButton->addClickEventListener([=](Ref* sender){
+	 auto jumpButtonPosX = visibleOrigin.x + visibleSize.width - jumpButton->getContentSize().width / 2 - 50; // center of the screen
+     auto jumpButtonPosY = visibleOrigin.y + jumpButton->getContentSize().height / 2 + 50; // position the button at the center of the screen
+     jumpButton->setPosition(Vec2(jumpButtonPosX, jumpButtonPosY));
+	 jumpButton->setAnchorPoint(Vec2(0.5f, 0.5f));
+     jumpButton->addClickEventListener([=](Ref* sender) {
          if (!character->getActionByTag(1)) {
-             auto jump = Sequence::create(
-                 MoveBy::create(0.3f, Vec2(0, 200)),
-                 MoveBy::create(0.4f, Vec2(0, -200)),
-                 nullptr
-             );
-             jump->setTag(1);
-             character->runAction(jump);
+             auto jumpRatio = 0.3f; // Adjust this value to change the jump height
+             float jumpHeight = cocos2d::Director::getInstance()->getVisibleSize().height * jumpRatio;
+
+             // Set the jumping sprite
+             character->setTexture("player_jump.png");
+
+             // Create jump action
+             auto jumpAction = cocos2d::JumpBy::create(1.0f, cocos2d::Vec2(0, 0), jumpHeight, 1);
+             jumpAction->setTag(1);
+
+             // After jump, revert back to idle sprite
+             auto revertSprite = cocos2d::CallFunc::create([=]() {
+                 character->setTexture("player_idle.png");
+                 });
+
+             // Sequence of jump then revert sprite
+             auto sequence = cocos2d::Sequence::create(jumpAction, revertSprite, nullptr);
+
+             character->runAction(sequence);
          }
-     });
+         });
+
      this->addChild(jumpButton, 100);
  
      return true;
