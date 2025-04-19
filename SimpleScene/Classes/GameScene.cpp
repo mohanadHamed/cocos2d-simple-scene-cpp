@@ -93,7 +93,7 @@
  
      // Jump Button
      auto jumpButton = cocos2d::ui::Button::create("jump_button.png"); // Use the correct namespace for Button
-	 auto jumpButtonPosX = visibleOrigin.x + visibleSize.width - jumpButton->getContentSize().width / 2 - 50; // center of the screen
+	 auto jumpButtonPosX = visibleOrigin.x + jumpButton->getContentSize().width / 2 + 50; // center of the screen
      auto jumpButtonPosY = visibleOrigin.y + jumpButton->getContentSize().height / 2 + 50; // position the button at the center of the screen
      jumpButton->setPosition(Vec2(jumpButtonPosX, jumpButtonPosY));
 	 jumpButton->setAnchorPoint(Vec2(0.5f, 0.5f));
@@ -110,8 +110,7 @@
 
          // Jump action
          auto jumpAction = cocos2d::JumpBy::create(1.0f, cocos2d::Vec2(0, 0), jumpHeight, 1);
-         jumpAction->setTag(1);
-
+         
          // After jump: revert sprite & unlock jump flag
          auto revertSprite = cocos2d::CallFunc::create([=]() mutable {
              character->setTexture("player_idle.png");
