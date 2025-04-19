@@ -24,6 +24,10 @@
 
  #include "GameScene.h"
  #include "ui/CocosGUI.h"
+ #include "Helpers/ResolutionHelper.h"
+
+ #include <fstream>
+ #include <string>
 
  USING_NS_CC;
  
@@ -39,6 +43,8 @@
      printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
  }
  
+ float startOffsetX = 0;
+
  // on "init" you need to initialize your instance
  bool GameScene::init()
  {
@@ -52,40 +58,63 @@
 	 isJumping = false;
      // Create Parallax Node
      auto parallaxNode = ParallaxNode::create();
-     float startOffsetX = 2160.0f;
+     
      parallaxNode->setPositionX(-startOffsetX);
 
      this->addChild(parallaxNode);
  
+     float heightScaleFactor = ResolutionHelper::getInstance().getScaleFactorHeight();
+     auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();                          // get visible size so we can have a viewpoint
+     auto visibleOrigin = cocos2d::Director::getInstance()->getVisibleOrigin();                             // same for origin point
+     auto placePosX = visibleOrigin.x + visibleSize.width / 2;
+	 auto placePosY = visibleOrigin.y;
+	 auto placePos = Vec2(placePosX, placePosY);
      // Background layer
      auto bg = Sprite::create("background.png");
-     bg->setAnchorPoint(Vec2::ZERO);
-     parallaxNode->addChild(bg, 0, Vec2(0.05f, 0.0f), Vec2::ZERO);
+     bg->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
+	 ResolutionHelper::getInstance().scaleSprite(*bg);
+     parallaxNode->addChild(bg, 0, Vec2(0.05f, 0.0f), ResolutionHelper::getInstance().getVerticallyScaledPosition(placePos));
  
      // Foreground layer
      auto fg = Sprite::create("foreground.png");
-     fg->setAnchorPoint(Vec2::ZERO);
-     parallaxNode->addChild(fg, 1, Vec2(0.8f, 0.0f), Vec2::ZERO);
+     fg->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
+     ResolutionHelper::getInstance().scaleSprite(*fg);
+     parallaxNode->addChild(fg, 1, Vec2(0.8f, 0.0f), ResolutionHelper::getInstance().getVerticallyScaledPosition(placePos));
  
      // Character sprite
      auto character = Sprite::create("player_idle.png");
-     auto visibleSize = cocos2d::Director::getInstance()->getVisibleSize();                          // get visible size so we can have a viewpoint
-     auto visibleOrigin = cocos2d::Director::getInstance()->getVisibleOrigin();                             // same for origin point
+     ResolutionHelper::getInstance().scaleSprite(*character);
      auto centerX = visibleOrigin.x + visibleSize.width / 2;  
 	 auto centerY = visibleOrigin.y + visibleSize.height / 2; // center of the screen
-     auto playerPosX = startOffsetX + visibleOrigin.x + visibleSize.width / 2 - character->getContentSize().width;
-	 auto playerPosY = centerY - character->getContentSize().height * 0.1f; // position the character at the center of the screen
-     character->setPosition(Vec2(playerPosX, playerPosY));                                                            // set the position of the character
+     auto playerPosX = visibleOrigin.x + visibleSize.width / 2;
+	 auto playerPosY = placePosY + character->getContentSize().height / 2; 
+	 character->setAnchorPoint(cocos2d::Vec2(0.5f, 0.0f));
+
+     //character->setPosition(Vec2(playerPosX, playerPosY)));                                                            // set the position of the character
  
-     parallaxNode->addChild(character, 2, Vec2(0.8f, 0.0f), character->getPosition());
+     std::ofstream outFile("visible.txt"); // File will be created in working directory
+     if (outFile.is_open()) {
+         outFile << "origin x: " << visibleOrigin.x << "\n";
+         outFile << "origin y: " << visibleOrigin.y << "\n";
+         outFile << "Width: " << visibleSize.width << "\n";
+         outFile << "Height: " << visibleSize.height << "\n";
+         outFile.close();
+     }
+     else {
+         CCLOG("Failed to open framesize.txt for writing");
+     }
+
+     parallaxNode->addChild(character, 2, Vec2(0.8f, 0.0f), ResolutionHelper::getInstance().getVerticallyScaledPosition(Vec2(playerPosX, playerPosY)));
  
      // Touch to scroll
      auto listener = EventListenerTouchOneByOne::create();
      listener->onTouchBegan = [](Touch* touch, Event* event) { return true; };
      listener->onTouchMoved = [parallaxNode](Touch* touch, Event* event) {
-         auto delta = touch->getDelta();
+		 auto delta = touch->getDelta();
+         float dragMax = cocos2d::Director::getInstance()->getVisibleSize().width / 2;
 		 auto newPos = parallaxNode->getPosition() + delta;
-         newPos = Vec2(std::min(std::max(newPos.x, -3120.0f), 120.0f), newPos.y); // Limit the delta to a maximum of half design width
+         newPos.x = std::max(newPos.x, -startOffsetX - dragMax);
+         newPos.x = std::min(newPos.x, -startOffsetX + dragMax);
 
          parallaxNode->setPosition(newPos);
      };
@@ -125,89 +154,5 @@
      this->addChild(jumpButton, 3);
  
      return true;
- 
-     /*
-     auto visibleSize = Director::getInstance()->getVisibleSize();
-     Vec2 origin = Director::getInstance()->getVisibleOrigin();
- 
-     /////////////////////////////
-     // 2. add a menu item with "X" image, which is clicked to quit the program
-     //    you may modify it.
- 
-     // add a "close" icon to exit the progress. it's an autorelease object
-     auto closeItem = MenuItemImage::create(
-                                            "CloseNormal.png",
-                                            "CloseSelected.png",
-                                            CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
- 
-     if (closeItem == nullptr ||
-         closeItem->getContentSize().width <= 0 ||
-         closeItem->getContentSize().height <= 0)
-     {
-         problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
-     }
-     else
-     {
-         float x = origin.x + visibleSize.width - closeItem->getContentSize().width/2;
-         float y = origin.y + closeItem->getContentSize().height/2;
-         closeItem->setPosition(Vec2(x,y));
-     }
- 
-     // create menu, it's an autorelease object
-     auto menu = Menu::create(closeItem, NULL);
-     menu->setPosition(Vec2::ZERO);
-     this->addChild(menu, 1);
- 
-     /////////////////////////////
-     // 3. add your codes below...
- 
-     // add a label shows "Hello World"
-     // create and initialize a label
- 
-     auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
-     if (label == nullptr)
-     {
-         problemLoading("'fonts/Marker Felt.ttf'");
-     }
-     else
-     {
-         // position the label on the center of the screen
-         label->setPosition(Vec2(origin.x + visibleSize.width/2,
-                                 origin.y + visibleSize.height - label->getContentSize().height));
- 
-         // add the label as a child to this layer
-         this->addChild(label, 1);
-     }
- 
-     // add "HelloWorld" splash screen"
-     auto sprite = Sprite::create("HelloWorld.png");
-     if (sprite == nullptr)
-     {
-         problemLoading("'HelloWorld.png'");
-     }
-     else
-     {
-         // position the sprite on the center of the screen
-         sprite->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
- 
-         // add the sprite as a child to this layer
-         this->addChild(sprite, 0);
-     }
-     return true;
-     */
  }
- 
- 
- // void HelloWorld::menuCloseCallback(Ref* pSender)
- // {
- //     //Close the cocos2d-x game scene and quit the application
- //     Director::getInstance()->end();
- 
- //     /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
- 
- //     //EventCustom customEndEvent("game_scene_close_event");
- //     //_eventDispatcher->dispatchEvent(&customEndEvent);
- 
- 
- // }
  

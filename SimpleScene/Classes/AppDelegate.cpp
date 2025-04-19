@@ -25,6 +25,12 @@
 #include "AppDelegate.h"
 #include "GameScene.h"
 
+#ifdef _WIN32
+
+#include <fstream>
+#include <string>
+#endif
+
 // #define USE_AUDIO_ENGINE 1
 
 #if USE_AUDIO_ENGINE
@@ -89,6 +95,18 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // Set the design resolution
     glview->setDesignResolutionSize(designResolutionSize.width, designResolutionSize.height, ResolutionPolicy::NO_BORDER);
     auto frameSize = glview->getFrameSize();
+#ifdef _WIN32
+    std::ofstream outFile("framesize.txt"); // File will be created in working directory
+    if (outFile.is_open()) {
+        outFile << "Width: " << frameSize.width << "\n";
+        outFile << "Height: " << frameSize.height << "\n";
+        outFile.close();
+    }
+    else {
+        CCLOG("Failed to open framesize.txt for writing");
+    }
+#endif
+
     // if the frame's height is larger than the height of medium size.
     if (frameSize.height > mediumResolutionSize.height)
     {        
