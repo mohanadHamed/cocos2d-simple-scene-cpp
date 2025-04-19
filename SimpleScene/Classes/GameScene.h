@@ -39,6 +39,10 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(GameScene);
+
+
+private:
+	bool isJumping;
 };
 
 #endif // __GAME_SCENE_H__

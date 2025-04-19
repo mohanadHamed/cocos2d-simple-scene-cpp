@@ -49,8 +49,12 @@
          return false;
      }
  
+	 isJumping = false;
      // Create Parallax Node
      auto parallaxNode = ParallaxNode::create();
+     float startOffsetX = 2160.0f;
+     parallaxNode->setPositionX(-startOffsetX);
+
      this->addChild(parallaxNode);
  
      // Background layer
@@ -69,7 +73,7 @@
      auto visibleOrigin = cocos2d::Director::getInstance()->getVisibleOrigin();                             // same for origin point
      auto centerX = visibleOrigin.x + visibleSize.width / 2;  
 	 auto centerY = visibleOrigin.y + visibleSize.height / 2; // center of the screen
-     auto playerPosX = centerX;
+     auto playerPosX = startOffsetX + visibleOrigin.x + visibleSize.width / 2 - character->getContentSize().width;
 	 auto playerPosY = centerY - character->getContentSize().height * 0.1f; // position the character at the center of the screen
      character->setPosition(Vec2(playerPosX, playerPosY));                                                            // set the position of the character
  
@@ -79,8 +83,11 @@
      auto listener = EventListenerTouchOneByOne::create();
      listener->onTouchBegan = [](Touch* touch, Event* event) { return true; };
      listener->onTouchMoved = [parallaxNode](Touch* touch, Event* event) {
-         Vec2 delta = touch->getDelta();
-         parallaxNode->setPosition(parallaxNode->getPosition() + delta);
+         auto delta = touch->getDelta();
+		 auto newPos = parallaxNode->getPosition() + delta;
+         newPos = Vec2(std::min(std::max(newPos.x, -3120.0f), 120.0f), newPos.y); // Limit the delta to a maximum of half design width
+
+         parallaxNode->setPosition(newPos);
      };
      _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
  
@@ -90,31 +97,33 @@
      auto jumpButtonPosY = visibleOrigin.y + jumpButton->getContentSize().height / 2 + 50; // position the button at the center of the screen
      jumpButton->setPosition(Vec2(jumpButtonPosX, jumpButtonPosY));
 	 jumpButton->setAnchorPoint(Vec2(0.5f, 0.5f));
-     jumpButton->addClickEventListener([=](Ref* sender) {
-         if (!character->getActionByTag(1)) {
-             auto jumpRatio = 0.3f; // Adjust this value to change the jump height
-             float jumpHeight = cocos2d::Director::getInstance()->getVisibleSize().height * jumpRatio;
+     jumpButton->addClickEventListener([=](Ref* sender) mutable {
+         if (isJumping) return;
 
-             // Set the jumping sprite
-             character->setTexture("player_jump.png");
+         isJumping = true;
 
-             // Create jump action
-             auto jumpAction = cocos2d::JumpBy::create(1.0f, cocos2d::Vec2(0, 0), jumpHeight, 1);
-             jumpAction->setTag(1);
+         auto jumpRatio = 0.3f;
+         float jumpHeight = cocos2d::Director::getInstance()->getVisibleSize().height * jumpRatio;
 
-             // After jump, revert back to idle sprite
-             auto revertSprite = cocos2d::CallFunc::create([=]() {
-                 character->setTexture("player_idle.png");
-                 });
+         // Set jumping sprite
+         character->setTexture("player_jump.png");
 
-             // Sequence of jump then revert sprite
-             auto sequence = cocos2d::Sequence::create(jumpAction, revertSprite, nullptr);
+         // Jump action
+         auto jumpAction = cocos2d::JumpBy::create(1.0f, cocos2d::Vec2(0, 0), jumpHeight, 1);
+         jumpAction->setTag(1);
 
-             character->runAction(sequence);
-         }
+         // After jump: revert sprite & unlock jump flag
+         auto revertSprite = cocos2d::CallFunc::create([=]() mutable {
+             character->setTexture("player_idle.png");
+             isJumping = false;
+             });
+
+         // Run jump sequence
+         auto sequence = cocos2d::Sequence::create(jumpAction, revertSprite, nullptr);
+         character->runAction(sequence);
          });
 
-     this->addChild(jumpButton, 100);
+     this->addChild(jumpButton, 3);
  
      return true;
  
