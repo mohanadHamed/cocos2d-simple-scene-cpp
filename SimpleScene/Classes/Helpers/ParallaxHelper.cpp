@@ -44,6 +44,8 @@ EventListenerTouchOneByOne* ParallaxHelper::buildTouchEventsListener(cocos2d::Pa
 	listener->onTouchBegan = [](Touch* touch, Event* event) { return true; };
 	listener->onTouchMoved = [parallaxNode](Touch* touch, Event* event) {
 		auto delta = touch->getDelta();
+
+		// Limit the drag distance to half the screen width
 		float dragMax = ResolutionHelper::getInstance().getEffectiveHeightScaleFactor() * cocos2d::Director::getInstance()->getVisibleSize().width / 2;
 		auto newPos = parallaxNode->getPosition() + delta;
 		newPos.x = std::max(newPos.x, -dragMax);

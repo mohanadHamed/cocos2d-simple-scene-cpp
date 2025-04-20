@@ -32,6 +32,7 @@ bool GameScene::init()
 	auto placePosX = visibleOrigin.x + visibleSize.width / 2;
 	auto placePosY = visibleOrigin.y;
 	auto placePos = Vec2(placePosX, placePosY);
+
 	// Background layer
 	ParallaxHelper::getInstance().addSprite(parallaxNode,
 		ResourceConstants::BACKGROUND_SPRITE,
