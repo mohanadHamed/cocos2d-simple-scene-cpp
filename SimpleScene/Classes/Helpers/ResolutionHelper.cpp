@@ -1,16 +1,13 @@
 #include "ResolutionHelper.h"
-#include <fstream>
-#include <string>
 
-const float ResolutionHelper::DESIGN_RESOLUTION_WIDTH = 4320;
-const float ResolutionHelper::DESIGN_RESOLUTION_HEIGHT = 2160;
-
-ResolutionHelper& ResolutionHelper::getInstance() {
+ResolutionHelper& ResolutionHelper::getInstance() 
+{
     static ResolutionHelper instance;
     return instance;
 }
 
-ResolutionHelper::ResolutionHelper() {
+ResolutionHelper::ResolutionHelper() 
+{
     _visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     _designResolution = cocos2d::Vec2(DESIGN_RESOLUTION_WIDTH, DESIGN_RESOLUTION_HEIGHT);
 	_frameSize = cocos2d::Director::getInstance()->getOpenGLView()->getFrameSize();
@@ -19,7 +16,8 @@ ResolutionHelper::ResolutionHelper() {
     calculateAspectRatios();
 }
 
-void ResolutionHelper::calculateScaleFactors() {
+void ResolutionHelper::calculateScaleFactors() 
+{
     _scaleFactorWidth = _visibleSize.width / _designResolution.width;
     _scaleFactorHeight = _visibleSize.height / _designResolution.height;
 	_scaleFactorFrameHeight = _frameSize.height / _designResolution.height;
@@ -63,15 +61,8 @@ cocos2d::Vec2 ResolutionHelper::getVerticallyScaledPosition(cocos2d::Vec2 origin
 	return cocos2d::Vec2(scaledX, scaledY);
 }
 
-void ResolutionHelper::scaleSprite(cocos2d::Sprite& sprite) {
-    // Design resolution and aspect ratio
-    ResolutionHelper& resolutionHelper = ResolutionHelper::getInstance();
-
-    // Check if aspect ratios are different
-    float uniformScaleFactor = (resolutionHelper.getCurrentAspectRatio() != resolutionHelper.getDesignAspectRatio()) ?
-        std::max(resolutionHelper.getScaleFactorWidth(), resolutionHelper.getScaleFactorHeight()) :
-        resolutionHelper.getScaleFactorWidth(); // Use width as a baseline for scaling if aspect ratios are the same because of horizontal parallax
-
+void ResolutionHelper::scaleSprite(cocos2d::Sprite *sprite) const 
+{
     // Scale the sprite
-    sprite.setScale(getEffectiveHeightScaleFactor());
+    sprite->setScale(getEffectiveHeightScaleFactor());
 }

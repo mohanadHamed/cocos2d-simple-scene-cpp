@@ -59,11 +59,14 @@ list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/GameScene.cpp
      Classes/Helpers/ResolutionHelper.cpp
+     Classes/Helpers/ParallaxHelper.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/GameScene.h
      Classes/Helpers/ResolutionHelper.h
+     Classes/Helpers/ParallaxHelper.h
+     classes/Helpers/ResourceConstants.h
      )
 
 if(ANDROID)

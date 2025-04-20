@@ -5,8 +5,8 @@
 
 class ResolutionHelper {
 public:
-    static const float DESIGN_RESOLUTION_WIDTH;
-    static const float DESIGN_RESOLUTION_HEIGHT;
+    static constexpr float DESIGN_RESOLUTION_WIDTH = 4320;
+    static constexpr float DESIGN_RESOLUTION_HEIGHT = 2160;
 
     static ResolutionHelper& getInstance();
 
@@ -19,7 +19,7 @@ public:
     float getDesignAspectRatio() const;
     float getCurrentAspectRatio() const;
     cocos2d::Vec2 getVerticallyScaledPosition(cocos2d::Vec2) const;
-	void scaleSprite(cocos2d::Sprite& sprite);
+	void scaleSprite(cocos2d::Sprite *sprite) const;
 
 private:
     ResolutionHelper();

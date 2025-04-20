@@ -7,15 +7,18 @@
 class GameScene : public cocos2d::Scene
 {
 public:
-    static cocos2d::Scene* createScene();
+	static cocos2d::Scene* createScene();
 
-    virtual bool init();
-    
-    // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
-    
-    // implement the "static create()" method manually
-    CREATE_FUNC(GameScene);
+	virtual bool init();
+
+	void addJumpButtonUI(cocos2d::Vec2& visibleOrigin, cocos2d::Sprite* characterSprite);
+
+	void jumpButtonClick(cocos2d::Sprite* characterSprite);
+
+	cocos2d::Sprite* createAndAddCharacterSprite(cocos2d::ParallaxNode *parallaxNode, cocos2d::Vec2 visibleOrigin, cocos2d::Size visibleSize, float placePosY);
+
+	// implement the "static create()" method manually
+	CREATE_FUNC(GameScene);
 
 
 private:
@@ -23,3 +26,4 @@ private:
 };
 
 #endif // __GAME_SCENE_H__
+
