@@ -67,8 +67,8 @@ void GameScene::addJumpButtonUI(cocos2d::Vec2& visibleOrigin, cocos2d::Sprite* c
 	int buttonPositionMargin = 50;
 	auto jumpButton = cocos2d::ui::Button::create(ResourceConstants::JUMP_BUTTON_SPRITE); // Use the correct namespace for Button
 	jumpButton->setScale(ResolutionHelper::getInstance().getScaleFactorHeight());
-	auto jumpButtonPosX = visibleOrigin.x + jumpButton->getContentSize().width / 2 + buttonPositionMargin; // center of the screen
-	auto jumpButtonPosY = visibleOrigin.y + jumpButton->getContentSize().height / 2 + buttonPositionMargin; // position the button at the center of the screen
+	auto jumpButtonPosX = visibleOrigin.x + jumpButton->getContentSize().width / 2 + buttonPositionMargin; // left of the screen
+	auto jumpButtonPosY = visibleOrigin.y + jumpButton->getContentSize().height / 2 + buttonPositionMargin; // bottom of the screen
 	jumpButton->setPosition(Vec2(jumpButtonPosX, jumpButtonPosY));
 	jumpButton->setAnchorPoint(Vec2(0.5f, 0.5f));
 	jumpButton->addClickEventListener([=](Ref* sender) mutable
