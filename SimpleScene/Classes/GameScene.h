@@ -11,18 +11,17 @@ public:
 
 	virtual bool init();
 
+	// implement the "static create()" method manually
+	CREATE_FUNC(GameScene);
+
+private:
+	bool isJumping;
+
 	void addJumpButtonUI(cocos2d::Vec2& visibleOrigin, cocos2d::Sprite* characterSprite);
 
 	void jumpButtonClick(cocos2d::Sprite* characterSprite);
 
 	cocos2d::Sprite* createAndAddCharacterSprite(cocos2d::ParallaxNode *parallaxNode, cocos2d::Vec2 visibleOrigin, cocos2d::Size visibleSize, float placePosY);
-
-	// implement the "static create()" method manually
-	CREATE_FUNC(GameScene);
-
-
-private:
-	bool isJumping;
 };
 
 #endif // __GAME_SCENE_H__
