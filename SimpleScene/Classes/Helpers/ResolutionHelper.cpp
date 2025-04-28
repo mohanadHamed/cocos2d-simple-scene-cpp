@@ -10,7 +10,7 @@ ResolutionHelper::ResolutionHelper()
 {
     _visibleSize = cocos2d::Director::getInstance()->getVisibleSize();
     _designResolution = cocos2d::Vec2(DESIGN_RESOLUTION_WIDTH, DESIGN_RESOLUTION_HEIGHT);
-	_frameSize = cocos2d::Director::getInstance()->getOpenGLView()->getFrameSize();
+    _frameSize = cocos2d::Director::getInstance()->getOpenGLView()->getFrameSize();
 
     calculateScaleFactors();
     calculateAspectRatios();
